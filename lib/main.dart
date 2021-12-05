@@ -4,10 +4,12 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart';
 import 'package:http/http.dart' as http;
+import 'package:mobileapp/create.dart';
 import 'package:mobileapp/note.dart';
+import 'package:mobileapp/update.dart';
 
 void main(List<String> args) {
-  runApp(HomePage());
+  runApp(MaterialApp(home: HomePage()));
 }
 
 class HomePage extends StatefulWidget {
@@ -29,7 +31,7 @@ class _HomePageState extends State<HomePage> {
 
   _getNotes() async {
     notes = [];
-    var url = Uri.https('angularcurd.herokuapp.com', '/users');
+    var url = Uri.http('127.0.0.1:8000', '/users');
 
     List response = json.decode((await client.get(url)).body);
     response.forEach((element) {
@@ -39,37 +41,59 @@ class _HomePageState extends State<HomePage> {
   }
 
   void _deleteNote(int id) {
-    var delete_url = Uri.https('angularcurd.herokuapp.com', '/users/$id/');
-    client.delete(delete_url);
+    var deleteurl = Uri.http('127.0.0.1:8000', '/users/$id/');
+    client.delete(deleteurl);
     _getNotes();
   }
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      home: Scaffold(
-        appBar: AppBar(
-          title: const Text('Stack Stores'),
-        ),
-        body: RefreshIndicator(
-          onRefresh: () async {
-            _getNotes();
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Stack Stores'),
+      ),
+      body: RefreshIndicator(
+        onRefresh: () async {
+          _getNotes();
+        },
+        child: ListView.builder(
+          itemCount: notes.length,
+          itemBuilder: (BuildContext context, int index) {
+            return ListTile(
+              title: Text(notes[index].email),
+              onTap: () {
+                Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (context) => UpdatePage(
+                      client: client,
+                      id: notes[index].id,
+                      email: notes[index].email,
+                    ),
+                  ),
+                );
+              },
+              trailing: IconButton(
+                onPressed: () {
+                  _deleteNote(notes[index].id);
+                },
+                icon: Icon(Icons.delete),
+              ),
+            );
           },
-          child: ListView.builder(
-            itemCount: notes.length,
-            itemBuilder: (BuildContext context, int index) {
-              return ListTile(
-                title: Text(notes[index].email),
-                trailing: IconButton(
-                  onPressed: () {
-                    _deleteNote(notes[index].id);
-                  },
-                  icon: Icon(Icons.delete),
-                ),
-              );
-            },
-          ),
         ),
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+                builder: (_) => CreatePage(
+                      client: client,
+                    )),
+          );
+        },
+        tooltip: 'Increment',
+        child: Icon(Icons.add),
       ),
     );
   }
