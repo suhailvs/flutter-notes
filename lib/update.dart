@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart';
+import 'package:mobileapp/urls.dart';
 
 class UpdatePage extends StatefulWidget {
   final Client client;
@@ -26,26 +27,36 @@ class _UpdatePageState extends State<UpdatePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(),
-      body: Column(
-        children: [
-          TextField(
-            controller: controller,
-            maxLines: 10,
-          ),
-          ElevatedButton(
-            onPressed: () {
-              var nid = widget.id;
-              var updateUrl = Uri.http('localhost:8000', '/users/$nid/');
-              widget.client.patch(
-                updateUrl,
-                body: {'email': controller.text},
-              );
-              Navigator.pop(context);
-            },
-            child: Text('Update note'),
-          )
-        ],
+      backgroundColor: Color(0xFFdde0e3),
+      appBar: AppBar(
+        title: Text('Update Note'),
+      ),
+      body: Container(
+        padding: EdgeInsets.all(10),
+        child: Column(
+          children: [
+            TextField(
+              controller: controller,
+              maxLines: 10,
+              decoration: InputDecoration(
+                filled: true,
+                fillColor: Colors.white,
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(10),
+                  borderSide: BorderSide.none,
+                ),
+              ),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                widget.client.patch(urlDeleteUpdate(widget.id),
+                    body: {'email': controller.text});
+                Navigator.pop(context);
+              },
+              child: Text("Update"),
+            ),
+          ],
+        ),
       ),
     );
   }
